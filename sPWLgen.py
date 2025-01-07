@@ -97,6 +97,12 @@ class VGAsignal:
                 'voltage': np.array([0, 0, black_level, black_level]),
                 'description': 'half line sync, starts with line_sync lasts for 1/2 line_period'
             }
+        self.end_zero = \
+            {
+                'time': np.array([0]),
+                'voltage': np.array([0]),
+                'description': 'end zero, signal stop'
+            }
 
         self.get_signal()
         # interlaced sequence
@@ -136,7 +142,8 @@ class VGAsignal:
             'half_display_line': self.half_display_line,
             'display_line': self.display_line,
             'half_null_line': self.half_null_line,
-            'half_line_sync': self.half_line_sync
+            'half_line_sync': self.half_line_sync,
+            'end_zero': self.end_zero
         }
 
         # Order of sequences and corresponding repetition counts
@@ -154,7 +161,8 @@ class VGAsignal:
             ('blank_line', 17),  # 17 blank lines
             ('display_line', 287),  # 287 odd display lines
             ('half_line_sync', 1),  # 1 half line sync
-            ('half_short_scanline', 5)  # 5 half short scanlines
+            ('half_short_scanline', 5),  # 5 half short scanlines
+            ('end_zero', 1)  # 1 end zero
         ]
 
         # Initialize signal arrays
@@ -228,7 +236,7 @@ if __name__ == "__main__":
     plt.show()
 
     # Plot the video portion of the signal
-    plt.figure(figsize=(12, 6))
+    # plt.figure(figsize=(12, 6))
     plt.plot(video_time, video_voltage, label="Video Signal", color='orange')
     plt.xlabel("Time (s)")
     plt.ylabel("Voltage (V)")
