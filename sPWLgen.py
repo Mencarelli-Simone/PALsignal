@@ -18,6 +18,8 @@ def save_to_ltspice_plf(filename, time_array, voltage_array):
     with open(filename, 'w') as file:
         for t, v in zip(time_array, voltage_array):
             file.write(f"{t:.12e} {v:.6f}\n")
+
+
 # Example usage:
 # save_to_ltspice_plf("vga_signal.plf", imposed_time, imposed_voltage)
 # class
@@ -246,6 +248,12 @@ class VGAsignal:
         final_time = merged_time[sorted_indices]  # Sorted time axis
         final_voltage = merged_voltage[sorted_indices]  # Sort corresponding voltages
 
+        # smooter
+
+        for i in range(len(final_time)):
+            if i > 1:
+                if final_time[i] == final_time[i - 1]:
+                    final_time[i] = final_time[i] + 1e-6  # add a microsec
         save_to_ltspice_plf('pal.pwl', final_time, final_voltage)
         return final_time, final_voltage
 
