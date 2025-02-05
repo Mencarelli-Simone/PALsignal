@@ -6,7 +6,21 @@ matplotlib.use('Qt5Agg')
 
 
 # %% parameters
+## fun
+def save_to_ltspice_plf(filename, time_array, voltage_array):
+    """
+    Save time and voltage arrays to an LTSpice-compatible Piecewise Linear Function (PLF) file.
 
+    :param filename: Name of the output file (e.g., 'output.plf')
+    :param time_array: Numpy array of time values
+    :param voltage_array: Numpy array of voltage values
+    """
+    with open(filename, 'w') as file:
+        for t, v in zip(time_array, voltage_array):
+            file.write(f"{t:.12e} {v:.6f}\n")
+# Example usage:
+# save_to_ltspice_plf("vga_signal.plf", imposed_time, imposed_voltage)
+# class
 
 class VGAsignal:
     def __init__(self):
@@ -79,10 +93,16 @@ class VGAsignal:
                 'voltage': np.array([0, 0, black_level, black_level]),
                 'description': 'half display line, starts with line_sync lasts for 1/2 line_period'
             }
+        # self.display_line = \
+        #     {
+        #         'time': np.array([0, line_sync, line_sync, line_period]),
+        #         'voltage': np.array([0, 0, black_level, white_level]),
+        #         'description': 'full display line, starts with line_sync lasts for 1/2 line_period'
+        #     }
         self.display_line = \
             {
                 'time': np.array([0, line_sync, line_sync, line_period]),
-                'voltage': np.array([0, 0, black_level, white_level]),
+                'voltage': np.array([0, 0, black_level, black_level]),
                 'description': 'full display line, starts with line_sync lasts for 1/2 line_period'
             }
         self.half_null_line = \
@@ -211,9 +231,23 @@ class VGAsignal:
 
     def impose_video_signal(self):
         """
-        imposes the video signal on the signal
+        Imposes the video signal on the full VGA signal by summing their voltages
+        while merging time indices and preserving step transitions.
         """
-        pass
+        # Get original signal and video components
+        signal_time, signal_voltage, video_time, video_voltage = self.get_signal()
+
+        # Step 1: Merge time axes **without removing duplicates**
+        merged_time = np.concatenate((signal_time, video_time))  # Merge without filtering
+        merged_voltage = np.concatenate((signal_voltage, video_voltage))  # Merge voltages
+
+        # Step 2: Sort everything while keeping order stable
+        sorted_indices = np.argsort(merged_time, kind='stable')  # Sort indices
+        final_time = merged_time[sorted_indices]  # Sorted time axis
+        final_voltage = merged_voltage[sorted_indices]  # Sort corresponding voltages
+
+        save_to_ltspice_plf('pal.pwl', final_time, final_voltage)
+        return final_time, final_voltage
 
 
 # Test code to plot the generated signal
@@ -241,6 +275,19 @@ if __name__ == "__main__":
     plt.xlabel("Time (s)")
     plt.ylabel("Voltage (V)")
     plt.title("Video Signal Overlay")
+    plt.grid()
+    plt.legend()
+    plt.show()
+
+    # Apply the video signal onto the full signal
+    imposed_time, imposed_voltage = vga_signal.impose_video_signal()
+
+    # Plot the imposed signal
+    plt.figure(figsize=(12, 6))
+    plt.plot(imposed_time, imposed_voltage, label="Imposed Signal", color="red")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Voltage (V)")
+    plt.title("VGA Signal with Imposed Video Signal")
     plt.grid()
     plt.legend()
     plt.show()
