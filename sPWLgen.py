@@ -4,7 +4,7 @@ import matplotlib
 
 matplotlib.use('Qt5Agg')
 
-
+zero_level = 0.00
 # %% parameters
 ## fun
 def save_to_ltspice_plf(filename, time_array, voltage_array):
@@ -44,9 +44,9 @@ class VGAsignal:
         broad_sync = line_period / 2 - 4.7e-6  # 59.35us pm 0.1us # for vertical blanking
 
         ## voltage parameters
-        black_level = 0.3
+        black_level = 0.28 * 2
         self.black_level = black_level
-        white_level = 1.0
+        white_level = 1.0 * 2
         self.white_level = white_level
 
         ## video resolution
@@ -65,34 +65,34 @@ class VGAsignal:
         self.half_broad_scanline = \
             {
                 'time': np.array([0, broad_sync, broad_sync, line_period / 2]),
-                'voltage': np.array([0, 0, black_level, black_level]),
+                'voltage': np.array([zero_level, zero_level, black_level, black_level]),
                 'description': 'half broad scanline, starts with broad_sync lasts for 1/2 line_period'
             }
         self.half_short_scanline = \
             {
                 'time': np.array([0, short_sync, short_sync, line_period / 2]),
-                'voltage': np.array([0, 0, black_level, black_level]),
+                'voltage': np.array([zero_level, zero_level, black_level, black_level]),
                 'description': 'half short scanline, starts with short_sync lasts for 1/2 line_period'
             }
 
         self.blank_line = \
             {
                 'time': np.array([0, line_sync, line_sync, line_period]),
-                'voltage': np.array([0, 0, black_level, black_level]),
+                'voltage': np.array([zero_level, zero_level, black_level, black_level]),
                 'description': 'blank line, starts with line_sync lasts for line_period'
             }
 
         self.half_blank_line = \
             {
                 'time': np.array([0, line_sync, line_sync, line_period / 2]),
-                'voltage': np.array([0, 0, black_level, white_level]),
+                'voltage': np.array([zero_level, zero_level, black_level, white_level]),
                 'description': 'half blank line, starts with line_sync lasts for 1/2 line_period'
             }
 
         self.half_display_line = \
             {
                 'time': np.array([0, line_sync, line_sync, line_period / 2]),
-                'voltage': np.array([0, 0, black_level, black_level]),
+                'voltage': np.array([zero_level, zero_level, black_level, black_level]),
                 'description': 'half display line, starts with line_sync lasts for 1/2 line_period'
             }
         # self.display_line = \
@@ -104,7 +104,7 @@ class VGAsignal:
         self.display_line = \
             {
                 'time': np.array([0, line_sync, line_sync, line_period]),
-                'voltage': np.array([0, 0, black_level, black_level]),
+                'voltage': np.array([zero_level, zero_level, black_level, black_level]),
                 'description': 'full display line, starts with line_sync lasts for 1/2 line_period'
             }
         self.half_null_line = \
@@ -116,13 +116,13 @@ class VGAsignal:
         self.half_line_sync = \
             {
                 'time': np.array([0, line_sync, line_sync, line_period / 2]),
-                'voltage': np.array([0, 0, black_level, black_level]),
+                'voltage': np.array([zero_level, zero_level, black_level, black_level]),
                 'description': 'half line sync, starts with line_sync lasts for 1/2 line_period'
             }
         self.end_zero = \
             {
                 'time': np.array([0]),
-                'voltage': np.array([0]),
+                'voltage': np.array([zero_level]),
                 'description': 'end zero, signal stop'
             }
 
@@ -275,7 +275,7 @@ if __name__ == "__main__":
     plt.title("Full VGA Signal")
     plt.grid()
     plt.legend()
-    plt.show()
+    # plt.show()
 
     # Plot the video portion of the signal
     # plt.figure(figsize=(12, 6))
@@ -285,7 +285,7 @@ if __name__ == "__main__":
     plt.title("Video Signal Overlay")
     plt.grid()
     plt.legend()
-    plt.show()
+    # plt.show()
 
     # Apply the video signal onto the full signal
     imposed_time, imposed_voltage = vga_signal.impose_video_signal()
